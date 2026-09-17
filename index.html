@@ -2,7 +2,7 @@
 <style>body{font-family:system-ui;margin:0;background:#f4f4f5;color:#18181b}header{background:#18181b;color:white;padding:12px;position:sticky;top:0}main{max-width:760px;margin:auto;padding:12px}.c{background:white;border-radius:15px;padding:16px;margin:10px 0}button,select{padding:11px;border:0;border-radius:10px;font-weight:700;margin:3px}.b{background:#2563eb;color:white}.r{background:#dc2626;color:white}.g{background:#16a34a;color:white}.a{background:#f59e0b;color:white}.p{background:#7c3aed;color:white}#q{font-size:22px;line-height:1.9;min-height:250px;white-space:pre-wrap}#ans,#grades,#reveal{display:none}.buzz #reveal{display:block}.revealed #ans,.revealed #grades{display:block}.revealed #reveal{display:none}#ans{background:#ecfdf5;padding:12px;border-radius:10px}.cut{border-left:4px solid #dc2626;padding-left:3px}.fullq{background:#f8fafc;padding:12px;border-radius:10px;margin-bottom:10px;line-height:1.7}.hint{font-size:12px;color:#64748b}.big{width:100%;font-size:20px;padding:17px}</style>
 <header><b>Anki傾斜 早押しTrainer</b>　<span id=n>0/0</span><br>出題 <select id=mode><option value=anki>Anki優先</option><option value=weak>苦手優先</option><option value=due>Due順</option><option value=random>ランダム</option></select>　速度 <input id=spd type=range min=40 max=400 value=120 step=10><span id=sv>120ms/字</span></header>
 <main><div class=c><input id=file type=file accept=".csv,.txt,.tsv"><button id=load>CSV / Anki TXTを読込</button>
-<div style="margin-top:10px"><select id="deckSelect"></select><button id="openDeck">問題集を開く</button><button id="deleteDeck">削除</button></div><p><small>学習状態CSVとAnkiの「ノートをプレーンテキストで書き出す」TXTに対応。TXTには学習状態がないため、傾斜出題はCSV読込時のみ有効です。</small></p></div>
+<div style="margin-top:10px"><select id="deckSelect"></select><button id="openDeck">問題集を開く</button><button id="deleteDeck">削除</button></div><div id="saveStatus" class="hint" style="margin-top:8px">保存済み問題集：0冊</div><p><small>学習状態CSVとAnkiの「ノートをプレーンテキストで書き出す」TXTに対応。TXTには学習状態がないため、傾斜出題はCSV読込時のみ有効です。</small></p></div>
 <div class=c id=card><small id=meta></small><div id=q></div><button class="b big" id=start>出題開始</button><button class="r big" id=buzz style="display:none">押す！</button><button class="b big" id=reveal>答えを見る</button><div id=ans></div><div id=grades><button class=r data-e=1>Again</button><button class=a data-e=2>Hard</button><button class=g data-e=3>Good</button><button class=p data-e=4>Easy</button><button id=resume>続きを読む</button></div></div>
 <div class=c><button id=prev>←前</button><button class=b id=next>次へ</button><button class=b id=export>Anki同期CSV</button> <span id=qc></span></div></main>
 <script>
@@ -16,12 +16,29 @@ E("start").onclick=()=>{state="reading";E("start").style.display="none";E("buzz"
 function next(){pos=(pos+1)%d.length;reset()}E("next").onclick=next;E("prev").onclick=()=>{pos=(pos-1+d.length)%d.length;reset()};document.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{let x=cur();Q.push({CardID:x.CardID,Ease:+b.dataset.e,Date:new Date().toISOString(),Front:x.Front});localStorage.setItem("slopeQ",JSON.stringify(Q));next()});
 function parse(s){let R=[],r=[],c="",z=false;for(let j=0;j<s.length;j++){let x=s[j];if(x=='"'){if(z&&s[j+1]=='"'){c+='"';j++}else z=!z}else if(x==','&&!z){r.push(c);c=""}else if((x=="\n"||x=="\r")&&!z){if(x=="\r"&&s[j+1]=="\n")j++;r.push(c);if(r.some(v=>v.trim()))R.push(r);r=[];c=""}else c+=x}r.push(c);if(r.some(v=>v.trim()))R.push(r);return R}
 
-let deckStore=JSON.parse(localStorage.getItem("hayaoshi_decks")||"{}");
-function saveDeckStore(){localStorage.setItem("hayaoshi_decks",JSON.stringify(deckStore))}
+let deckStore={};
+try{deckStore=JSON.parse(localStorage.getItem("hayaoshi_decks")||"{}")||{}}catch(e){deckStore={}}
+function saveDeckStore(){
+ try{
+   localStorage.setItem("hayaoshi_decks",JSON.stringify(deckStore));
+   updateSaveStatus("保存しました");
+   return true;
+ }catch(e){
+   alert("端末への保存に失敗しました。ブラウザのサイトデータ設定や空き容量を確認してください。");
+   updateSaveStatus("保存失敗");
+   return false;
+ }
+}
+function updateSaveStatus(prefix=""){
+ let el=E("saveStatus"); if(!el)return;
+ let names=Object.keys(deckStore), total=names.reduce((a,n)=>a+(deckStore[n]?.length||0),0);
+ el.textContent=(prefix?prefix+" / ":"")+"保存済み問題集："+names.length+"冊（"+total+"問）";
+}
 function refreshDecks(){
  let sel=E("deckSelect"); if(!sel)return; let current=sel.value; sel.innerHTML="";
  Object.keys(deckStore).forEach(n=>{let op=document.createElement("option");op.value=n;op.textContent=n+" ("+deckStore[n].length+"問)";sel.appendChild(op)});
  if(deckStore[current])sel.value=current;
+ updateSaveStatus();
 }
 function openSavedDeck(n){
  if(!deckStore[n])return; d=deckStore[n];localStorage.setItem("hayaoshi_last_name",n);build();
@@ -43,4 +60,13 @@ if(last&&deckStore[last]){E("deckSelect").value=last;openSavedDeck(last)}
 else if(names.length){E("deckSelect").value=names[0];openSavedDeck(names[0])}
 reset()
 </script>
-<script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js"));</script>
+<script>
+if("serviceWorker"in navigator){
+ addEventListener("load",async()=>{
+  try{
+   const r=await navigator.serviceWorker.register("./service-worker.js");
+   await r.update();
+  }catch(e){}
+ });
+}
+</script>
