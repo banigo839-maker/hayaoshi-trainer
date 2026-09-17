@@ -1,66 +1,25 @@
-<!doctype html>
-<html lang="ja"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#18181b">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icon.svg">
-<title>早押しTrainer</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#f4f4f5;color:#18181b;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;padding-bottom:90px}
-header{position:sticky;top:0;z-index:5;background:#18181b;color:white;padding:11px}.row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}
-main{max-width:780px;margin:auto;padding:12px}.card{background:white;border-radius:16px;padding:16px;margin:10px 0;box-shadow:0 1px 5px #0001}
-button,select{border:0;border-radius:10px;padding:10px 12px;font-weight:800}.blue{background:#2563eb;color:white}.red{background:#dc2626;color:white}.green{background:#16a34a;color:white}.amber{background:#f59e0b;color:white}.purple{background:#7c3aed;color:white}.gray{background:#e4e4e7}
-#q{font-size:22px;line-height:1.9;min-height:245px;white-space:pre-wrap}.small{font-size:12px;color:#71717a}.big{width:100%;font-size:21px;padding:18px;margin-top:10px}
-#answer,#grades,#reveal{display:none}.buzzed #reveal{display:block}.revealed #answer,.revealed #grades{display:block}.revealed #reveal{display:none}
-#answer{background:#ecfdf5;padding:14px;border-radius:11px;margin-top:10px;font-size:19px}.bottom{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;padding:9px 10px calc(9px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:7px}
-.badge{background:#ffffff20;padding:5px 8px;border-radius:8px;font-size:12px}.notice{background:#eff6ff;padding:10px;border-radius:10px;font-size:13px}
-</style></head><body>
-<header><div class="row between"><b>早押しTrainer</b><span id="counter">0/0</span></div>
-<div class="row"><span>出題</span><select id="mode"><option value="anki">Anki優先</option><option value="weak">苦手優先</option><option value="due">Due順</option><option value="random">ランダム</option></select>
-<span>速度</span><input id="speed" type="range" min="40" max="400" value="120" step="10"><span id="sv">120ms/字</span><span class="badge" id="queueCount">同期待ち0</span></div></header>
-<main>
-<div class="card"><div class="row"><input id="file" type="file" accept=".csv"><button class="gray" id="load">CSVを読込・保存</button><button class="gray" id="forget">問題集を削除</button></div>
-<div class="small" id="savedInfo">保存済み問題集なし</div><div class="notice">一度CSVを読み込むと、この端末内に問題集を保存し、次回起動時に自動復元します。</div></div>
-<div class="card" id="card"><div class="small" id="meta"></div><div id="q"></div>
-<button class="blue big" id="start">出題開始</button><button class="red big" id="buzz" style="display:none">押す！</button>
-<button class="blue big" id="reveal">答えを見る</button><div id="answer"></div>
-<div id="grades" style="margin-top:10px"><div class="small">Ankiへ返す評価</div><div class="row"><button class="red" data-e="1">Again</button><button class="amber" data-e="2">Hard</button><button class="green" data-e="3">Good</button><button class="purple" data-e="4">Easy</button><button class="gray" id="resume">続きを読む</button></div></div></div>
-<div class="card"><b>同期</b><div class="row" style="margin-top:8px"><button class="blue" id="export">Anki同期CSV</button><button class="gray" id="clear">同期待ちクリア</button></div><div class="small">同期CSVをPCへ戻して、作成済みの同期スクリプトでAnkiに反映します。</div></div>
-</main><div class="bottom"><button class="gray" id="prev">← 前</button><button class="blue" id="next">次へ</button></div>
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#18181b"><link rel="manifest" href="./manifest.webmanifest"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2720%27 fill=%27%2318181b%27/%3E%3Ctext x=%2750%27 y=%2768%27 font-size=%2760%27 text-anchor=%27middle%27 fill=%27white%27%3EQ%3C/text%3E%3C/svg%3E"><title>Anki傾斜 早押しTrainer</title>
+<style>body{font-family:system-ui;margin:0;background:#f4f4f5;color:#18181b}header{background:#18181b;color:white;padding:12px;position:sticky;top:0}main{max-width:760px;margin:auto;padding:12px}.c{background:white;border-radius:15px;padding:16px;margin:10px 0}button,select{padding:11px;border:0;border-radius:10px;font-weight:700;margin:3px}.b{background:#2563eb;color:white}.r{background:#dc2626;color:white}.g{background:#16a34a;color:white}.a{background:#f59e0b;color:white}.p{background:#7c3aed;color:white}#q{font-size:22px;line-height:1.9;min-height:250px;white-space:pre-wrap}#ans,#grades,#reveal{display:none}.buzz #reveal{display:block}.revealed #ans,.revealed #grades{display:block}.revealed #reveal{display:none}#ans{background:#ecfdf5;padding:12px;border-radius:10px}.cut{border-left:4px solid #dc2626;padding-left:3px}.fullq{background:#f8fafc;padding:12px;border-radius:10px;margin-bottom:10px;line-height:1.7}.hint{font-size:12px;color:#64748b}.big{width:100%;font-size:20px;padding:17px}</style>
+<header><b>Anki傾斜 早押しTrainer</b>　<span id=n>0/0</span><br>出題 <select id=mode><option value=anki>Anki優先</option><option value=weak>苦手優先</option><option value=due>Due順</option><option value=random>ランダム</option></select>　速度 <input id=spd type=range min=40 max=400 value=120 step=10><span id=sv>120ms/字</span></header>
+<main><div class=c><input id=file type=file accept=".csv,.txt,.tsv"><button id=load>CSV / Anki TXTを読込</button><p><small>学習状態CSVとAnkiの「ノートをプレーンテキストで書き出す」TXTに対応。TXTには学習状態がないため、傾斜出題はCSV読込時のみ有効です。</small></p></div>
+<div class=c id=card><small id=meta></small><div id=q></div><button class="b big" id=start>出題開始</button><button class="r big" id=buzz style="display:none">押す！</button><button class="b big" id=reveal>答えを見る</button><div id=ans></div><div id=grades><button class=r data-e=1>Again</button><button class=a data-e=2>Hard</button><button class=g data-e=3>Good</button><button class=p data-e=4>Easy</button><button id=resume>続きを読む</button></div></div>
+<div class=c><button id=prev>←前</button><button class=b id=next>次へ</button><button class=b id=export>Anki同期CSV</button> <span id=qc></span></div></main>
 <script>
-"use strict";
-let data=[],order=[],pos=0,ci=0,timer=null,bp=null,state="ready";
-let syncQ=JSON.parse(localStorage.getItem("hayaoshi_sync")||"[]");
-const E=x=>document.getElementById(x), card=E("card"), qel=E("q");
-function num(x,d=0){let n=Number(x);return Number.isFinite(n)?n:d}
-function score(x){return num(x.Lapses)*25+60/(num(x.Interval)+1)+Math.log1p(num(x.Reviews))*3+Math.max(0,(2500-num(x.Ease,2500))/100)}
-function rebuild(){order=data.map((_,i)=>i);let m=E("mode").value;
- if(m==="random"){for(let i=order.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}}
- else if(m==="due")order.sort((a,b)=>num(data[a].Due,1e15)-num(data[b].Due,1e15));
- else if(m==="weak")order.sort((a,b)=>(num(data[b].Lapses)*100+60/(num(data[b].Interval)+1))-(num(data[a].Lapses)*100+60/(num(data[a].Interval)+1)));
- else order.sort((a,b)=>score(data[b])-score(data[a]));
- pos=0;reset()}
-function cur(){return data[order[pos]]}
-function stop(){if(timer!==null){clearTimeout(timer);timer=null}}
-function reset(){stop();ci=0;bp=null;state="ready";card.classList.remove("buzzed","revealed");qel.textContent="";E("queueCount").textContent="同期待ち"+syncQ.length;
- if(!data.length){E("meta").textContent="CSVを読み込んでください";E("counter").textContent="0/0";E("start").style.display="block";E("buzz").style.display="none";return}
- let x=cur();E("answer").innerHTML="<b>正解：</b>"+escapeHtml(x.Back);E("meta").textContent=`Interval ${x.Interval||"-"}日 / Lapses ${x.Lapses||"0"} / Reviews ${x.Reviews||"0"} / Due ${x.Due||"-"}`;E("counter").textContent=(pos+1)+"/"+data.length;E("start").style.display="block";E("buzz").style.display="none"}
-function begin(){if(state!=="ready"||!data.length)return;state="reading";E("start").style.display="none";E("buzz").style.display="block";tick()}
-function tick(){if(state!=="reading")return;let s=cur().Front;if(ci>=s.length){state="finished";return}qel.textContent=s.slice(0,++ci);timer=setTimeout(tick,+E("speed").value)}
-function buzz(){if(!["reading","finished"].includes(state))return;stop();bp=ci;state="buzzed";card.classList.add("buzzed");let x=cur(),pct=x.Front.length?Math.round(bp/x.Front.length*100):0;E("meta").textContent=`押した位置 ${bp}/${x.Front.length}字 (${pct}%)`;if(navigator.vibrate)navigator.vibrate(35)}
-function reveal(){if(state==="buzzed")card.classList.add("revealed")}
-function resume(){if(state!=="buzzed")return;card.classList.remove("buzzed","revealed");bp=null;state="reading";tick()}
-function grade(e){let x=cur();syncQ.push({CardID:x.CardID,Ease:e,Date:new Date().toISOString(),Front:x.Front});localStorage.setItem("hayaoshi_sync",JSON.stringify(syncQ));next()}
-function next(){if(!data.length)return;pos=(pos+1)%data.length;reset()} function prev(){if(!data.length)return;pos=(pos-1+data.length)%data.length;reset()}
-function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-function parseCSV(t){let R=[],r=[],c="",z=false;for(let i=0;i<t.length;i++){let x=t[i];if(x==='"'){if(z&&t[i+1]==='"'){c+='"';i++}else z=!z}else if(x===","&&!z){r.push(c);c=""}else if((x==="\n"||x==="\r")&&!z){if(x==="\r"&&t[i+1]==="\n")i++;r.push(c);if(r.some(v=>v.trim()))R.push(r);r=[];c=""}else c+=x}r.push(c);if(r.some(v=>v.trim()))R.push(r);return R}
-async function saveDeck(rows,name){localStorage.setItem("hayaoshi_deck",JSON.stringify(rows));localStorage.setItem("hayaoshi_deck_name",name);E("savedInfo").textContent=`保存済み: ${name}（${rows.length}枚）`}
-function restore(){try{let x=JSON.parse(localStorage.getItem("hayaoshi_deck")||"[]");if(x.length){data=x;E("savedInfo").textContent=`保存済み: ${localStorage.getItem("hayaoshi_deck_name")||"問題集"}（${x.length}枚）`;rebuild()}}catch(e){}}
-async function load(){let f=E("file").files[0];if(!f)return alert("CSVを選択してください");let rows=parseCSV(await f.text()),h=rows.shift();let arr=rows.map(r=>Object.fromEntries(h.map((k,i)=>[k,r[i]??""]))).filter(x=>x.Front&&x.Back);if(!arr.length)return alert("問題を認識できませんでした");data=arr;await saveDeck(arr,f.name);rebuild();alert(arr.length+"枚を保存しました")}
-function download(){if(!syncQ.length)return alert("同期待ちはありません");let rows=[["CardID","Ease","Date","Front"],...syncQ.map(x=>[x.CardID,x.Ease,x.Date,x.Front])];let csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");let a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv"}));a.download="anki_sync_queue.csv";a.click()}
-E("load").onclick=load;E("forget").onclick=()=>{if(confirm("端末に保存した問題集を削除しますか？")){localStorage.removeItem("hayaoshi_deck");localStorage.removeItem("hayaoshi_deck_name");data=[];order=[];E("savedInfo").textContent="保存済み問題集なし";reset()}};
-E("mode").onchange=rebuild;E("speed").oninput=e=>E("sv").textContent=e.target.value+"ms/字";E("start").onclick=begin;E("buzz").onclick=buzz;E("reveal").onclick=reveal;E("resume").onclick=resume;E("next").onclick=next;E("prev").onclick=prev;E("export").onclick=download;E("clear").onclick=()=>{if(confirm("同期待ちをクリアしますか？")){syncQ=[];localStorage.setItem("hayaoshi_sync","[]");reset()}};
-document.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>grade(+b.dataset.e));document.addEventListener("keydown",e=>{if(e.code==="Space"&&!e.repeat){e.preventDefault();buzz()}});
-if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js"));
-restore();reset();
-</script></body></html>
+let d=[],o=[],pos=0,i=0,t=null,bp=null,state="ready",Q=JSON.parse(localStorage.getItem("slopeQ")||"[]");const E=x=>document.getElementById(x);
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function num(x,z=0){x=Number(x);return isFinite(x)?x:z}function score(x){return num(x.Lapses)*25+60/(num(x.Interval)+1)+Math.log1p(num(x.Reviews))*3+Math.max(0,(2500-num(x.Ease,2500))/100)}
+function build(){o=d.map((_,i)=>i);let m=E("mode").value;if(m=="random")o.sort(()=>Math.random()-.5);else if(m=="due")o.sort((a,b)=>num(d[a].Due,1e15)-num(d[b].Due,1e15));else if(m=="weak")o.sort((a,b)=>(num(d[b].Lapses)*100+60/(num(d[b].Interval)+1))-(num(d[a].Lapses)*100+60/(num(d[a].Interval)+1)));else o.sort((a,b)=>score(d[b])-score(d[a]));pos=0;reset()}
+function cur(){return d[o[pos]]}function stop(){clearTimeout(t);t=null}function reset(){stop();i=0;bp=null;state="ready";E("card").classList.remove("buzz","revealed");E("q").textContent="";E("qc").textContent="同期待ち "+Q.length;if(!d.length)return;let x=cur();E("ans").innerHTML="";E("meta").textContent="Interval "+x.Interval+"日 / Lapses "+x.Lapses+" / Reviews "+x.Reviews+" / Due "+x.Due;E("n").textContent=(pos+1)+"/"+d.length;E("start").style.display="block";E("buzz").style.display="none"}
+function tick(){if(state!="reading")return;let s=cur().Front;if(i>=s.length){state="finished";return}E("q").textContent=s.slice(0,++i);t=setTimeout(tick,+E("spd").value)}
+E("start").onclick=()=>{state="reading";E("start").style.display="none";E("buzz").style.display="block";tick()};E("buzz").onclick=()=>{if(!["reading","finished"].includes(state))return;stop();bp=i;state="buzz";E("card").classList.add("buzz");E("card").classList.remove("revealed")};E("resume").onclick=()=>{E("card").classList.remove("buzz","revealed");bp=null;state="reading";tick()};E("reveal").onclick=()=>{if(state=="buzz"){let x=cur(),p=bp??i,a=x.Front.slice(0,p),b=x.Front.slice(p);E("q").textContent=x.Front;E("ans").innerHTML='<div class="fullq"><div class="hint">問題全文（赤線が押した位置）</div>'+esc(a)+'<span class="cut">'+esc(b)+'</span></div><b>正解：</b>'+esc(x.Back);E("meta").textContent="押した位置 "+p+"/"+x.Front.length+"字 ("+Math.round(p/x.Front.length*100)+"%)";E("card").classList.add("revealed")}};
+function next(){pos=(pos+1)%d.length;reset()}E("next").onclick=next;E("prev").onclick=()=>{pos=(pos-1+d.length)%d.length;reset()};document.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{let x=cur();Q.push({CardID:x.CardID,Ease:+b.dataset.e,Date:new Date().toISOString(),Front:x.Front});localStorage.setItem("slopeQ",JSON.stringify(Q));next()});
+function parse(s){let R=[],r=[],c="",z=false;for(let j=0;j<s.length;j++){let x=s[j];if(x=='"'){if(z&&s[j+1]=='"'){c+='"';j++}else z=!z}else if(x==','&&!z){r.push(c);c=""}else if((x=="\n"||x=="\r")&&!z){if(x=="\r"&&s[j+1]=="\n")j++;r.push(c);if(r.some(v=>v.trim()))R.push(r);r=[];c=""}else c+=x}r.push(c);if(r.some(v=>v.trim()))R.push(r);return R}
+E("load").onclick=async()=>{let f=E("file").files[0];if(!f)return alert("ファイルを選択");let text=await f.text(),arr=[];
+if(/^\s*#separator:tab/m.test(text)||/\.(txt|tsv)$/i.test(f.name)){
+ let lines=text.split(/\r?\n/).filter(x=>x.trim()&&!x.startsWith("#"));
+ for(let line of lines){let p=line.split("\t");if(p.length>=2&&p[0].trim()&&p[1].trim())arr.push({CardID:"",Front:p[0].trim(),Back:p[1].trim(),Tags:(p[2]||"").trim(),Due:"",Interval:"",Ease:"",Reviews:"",Lapses:""})}
+}else{let R=parse(text);if(R.length){let h=R.shift();arr=R.map(r=>Object.fromEntries(h.map((k,j)=>[k,r[j]||""]))).filter(x=>x.Front&&x.Back)}}
+if(!arr.length)return alert("問題を認識できませんでした");d=arr;build();alert(d.length+"問を読み込みました"+(d.some(x=>x.CardID)?"":"（Anki TXT：学習傾斜なし）"))};E("mode").onchange=build;E("spd").oninput=e=>E("sv").textContent=e.target.value+"ms/字";
+E("export").onclick=()=>{if(!Q.length)return alert("同期待ちなし");let R=[["CardID","Ease","Date","Front"],...Q.map(x=>[x.CardID,x.Ease,x.Date,x.Front])],s=R.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+s],{type:"text/csv"}));a.download="anki_sync_queue.csv";a.click()};reset()
+</script>
+<script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js"));</script>
