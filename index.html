@@ -34,14 +34,13 @@ if(/^\s*#separator:tab/m.test(text)||/\.(txt|tsv)$/i.test(f.name)){
 if(!arr.length)return alert("問題を認識できませんでした");
 let deckName=f.name.replace(/\.[^.]+$/,"");deckStore[deckName]=arr;saveDeckStore();refreshDecks();E("deckSelect").value=deckName;d=arr;localStorage.setItem("hayaoshi_last_name",deckName);build();
 alert(d.length+"問を「"+deckName+"」として保存しました"+(d.some(x=>x.CardID)?"":"（Anki TXT：学習傾斜なし）"))};E("mode").onchange=build;E("spd").oninput=e=>E("sv").textContent=e.target.value+"ms/字";
-E("export").onclick=()=>{if(!Q.length)return alert("同期待ちなし");let R=[["CardID","Ease","Date","Front"],...Q.map(x=>[x.CardID,x.Ease,x.Date,x.Front])],s=R.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+s],{type:"text/csv"}));a.download="anki_sync_queue.csv";a.click()};reset()
-</script>
-
+E("export").onclick=()=>{if(!Q.length)return alert("同期待ちなし");let R=[["CardID","Ease","Date","Front"],...Q.map(x=>[x.CardID,x.Ease,x.Date,x.Front])],s=R.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+s],{type:"text/csv"}));a.download="anki_sync_queue.csv";a.click()};
 E("openDeck").onclick=()=>openSavedDeck(E("deckSelect").value);
 E("deleteDeck").onclick=()=>{let n=E("deckSelect").value;if(!n||!deckStore[n])return;if(confirm("「"+n+"」を端末から削除しますか？")){delete deckStore[n];saveDeckStore();refreshDecks();let names=Object.keys(deckStore);if(names.length){E("deckSelect").value=names[0];openSavedDeck(names[0])}else{d=[];o=[];pos=0;E("q").textContent="";E("n").textContent="0/0"}}};
 refreshDecks();
 let last=localStorage.getItem("hayaoshi_last_name"),names=Object.keys(deckStore);
 if(last&&deckStore[last]){E("deckSelect").value=last;openSavedDeck(last)}
 else if(names.length){E("deckSelect").value=names[0];openSavedDeck(names[0])}
-
+reset()
+</script>
 <script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js"));</script>
